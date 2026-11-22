@@ -29,6 +29,45 @@ export interface SourceConnection {
 
 export type LlmProvider = "none" | "openai" | "anthropic" | "gemini";
 
+export interface MessagingSettings {
+  telegramBotToken: string;
+  telegramBotUsername: string;
+  telegramWebhookSecret: string;
+  allowedTelegramChatIds: string[];
+  whatsappPhoneNumberId: string;
+  whatsappAccessToken: string;
+  whatsappVerifyToken: string;
+  whatsappAppSecret: string;
+  whatsappBusinessNumber: string;
+  allowedWhatsappNumbers: string[];
+}
+
+export type SecuritySeverity = "critical" | "high" | "medium" | "low" | "pass";
+
+export interface SecurityFinding {
+  id: string;
+  category:
+    | "oauth_scopes"
+    | "token_hygiene"
+    | "webhook_auth"
+    | "filesystem"
+    | "secrets_exposure";
+  severity: SecuritySeverity;
+  title: string;
+  detail: string;
+  remediation: string;
+}
+
+export interface SecurityAuditReport {
+  id: string;
+  runAt: string;
+  score: number;
+  grade: "A" | "B" | "C" | "D" | "F";
+  summary: string;
+  findings: SecurityFinding[];
+  counts: Record<SecuritySeverity, number>;
+}
+
 export interface AppSettings {
   googleClientId: string;
   googleClientSecret: string;
@@ -41,6 +80,7 @@ export interface AppSettings {
   llmProvider: LlmProvider;
   llmApiKey: string;
   sandboxEnabled: boolean;
+  messaging: MessagingSettings;
 }
 
 export interface ProjectItem {
@@ -138,4 +178,5 @@ export interface StoreData {
   connections: Record<ProviderId, SourceConnection>;
   localScans: LocalFolderScanPayload[];
   snapshots: SnapshotRecord[];
+  securityAudits: SecurityAuditReport[];
 }

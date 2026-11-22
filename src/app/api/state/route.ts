@@ -17,5 +17,6 @@ export async function GET() {
       detectedStack: s.detectedStack,
     })),
     snapshots: store.snapshots,
+    securityAudits: store.securityAudits,
   });
 }

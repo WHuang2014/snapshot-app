@@ -19,6 +19,18 @@ export async function POST(req: Request) {
     llmProvider?: LlmProvider;
     llmApiKey?: string;
     sandboxEnabled?: boolean;
+    messaging?: {
+      telegramBotToken?: string;
+      telegramBotUsername?: string;
+      telegramWebhookSecret?: string;
+      allowedTelegramChatIds?: string[];
+      whatsappPhoneNumberId?: string;
+      whatsappAccessToken?: string;
+      whatsappVerifyToken?: string;
+      whatsappAppSecret?: string;
+      whatsappBusinessNumber?: string;
+      allowedWhatsappNumbers?: string[];
+    };
   };
 
   const store = readStore();
@@ -55,6 +67,55 @@ export async function POST(req: Request) {
   }
   if (body.sandboxEnabled !== undefined) {
     s.sandboxEnabled = body.sandboxEnabled;
+  }
+
+  if (body.messaging) {
+    const m = body.messaging;
+    if (m.telegramBotToken !== undefined && !m.telegramBotToken.includes("••••")) {
+      s.messaging.telegramBotToken = m.telegramBotToken.trim();
+    }
+    if (m.telegramBotUsername !== undefined) {
+      s.messaging.telegramBotUsername = m.telegramBotUsername.trim().replace(/^@/, "");
+    }
+    if (
+      m.telegramWebhookSecret !== undefined &&
+      !m.telegramWebhookSecret.includes("••••")
+    ) {
+      s.messaging.telegramWebhookSecret = m.telegramWebhookSecret.trim();
+    }
+    if (m.allowedTelegramChatIds !== undefined) {
+      s.messaging.allowedTelegramChatIds = m.allowedTelegramChatIds
+        .map((x) => x.trim())
+        .filter(Boolean);
+    }
+    if (m.whatsappPhoneNumberId !== undefined) {
+      s.messaging.whatsappPhoneNumberId = m.whatsappPhoneNumberId.trim();
+    }
+    if (
+      m.whatsappAccessToken !== undefined &&
+      !m.whatsappAccessToken.includes("••••")
+    ) {
+      s.messaging.whatsappAccessToken = m.whatsappAccessToken.trim();
+    }
+    if (m.whatsappVerifyToken !== undefined) {
+      s.messaging.whatsappVerifyToken = m.whatsappVerifyToken.trim();
+    }
+    if (
+      m.whatsappAppSecret !== undefined &&
+      !m.whatsappAppSecret.includes("••••")
+    ) {
+      s.messaging.whatsappAppSecret = m.whatsappAppSecret.trim();
+    }
+    if (m.whatsappBusinessNumber !== undefined) {
+      s.messaging.whatsappBusinessNumber = m.whatsappBusinessNumber
+        .trim()
+        .replace(/[^\d]/g, "");
+    }
+    if (m.allowedWhatsappNumbers !== undefined) {
+      s.messaging.allowedWhatsappNumbers = m.allowedWhatsappNumbers
+        .map((x) => x.trim().replace(/[^\d]/g, ""))
+        .filter(Boolean);
+    }
   }
 
   writeStore(store);

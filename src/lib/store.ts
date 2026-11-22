@@ -23,6 +23,18 @@ function defaultSettings(): AppSettings {
     llmProvider: "none",
     llmApiKey: "",
     sandboxEnabled: true,
+    messaging: {
+      telegramBotToken: process.env.TELEGRAM_BOT_TOKEN ?? "",
+      telegramBotUsername: process.env.TELEGRAM_BOT_USERNAME ?? "",
+      telegramWebhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET ?? "",
+      allowedTelegramChatIds: [],
+      whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID ?? "",
+      whatsappAccessToken: process.env.WHATSAPP_ACCESS_TOKEN ?? "",
+      whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN ?? "",
+      whatsappAppSecret: process.env.WHATSAPP_APP_SECRET ?? "",
+      whatsappBusinessNumber: process.env.WHATSAPP_BUSINESS_NUMBER ?? "",
+      allowedWhatsappNumbers: [],
+    },
   };
 }
 
@@ -117,6 +129,7 @@ export function readStore(): StoreData {
       connections: defaultConnections(),
       localScans: [],
       snapshots: [],
+      securityAudits: [],
     };
     writeStore(initial);
     return initial;
@@ -125,11 +138,20 @@ export function readStore(): StoreData {
   try {
     const raw = fs.readFileSync(STORE_PATH, "utf-8");
     const parsed = JSON.parse(raw) as StoreData;
+    const def = defaultSettings();
     return {
-      settings: { ...defaultSettings(), ...(parsed.settings ?? {}) },
+      settings: {
+        ...def,
+        ...(parsed.settings ?? {}),
+        messaging: {
+          ...def.messaging,
+          ...(parsed.settings?.messaging ?? {}),
+        },
+      },
       connections: { ...defaultConnections(), ...(parsed.connections ?? {}) },
       localScans: parsed.localScans ?? [],
       snapshots: parsed.snapshots ?? [],
+      securityAudits: parsed.securityAudits ?? [],
     };
   } catch {
     const fallback: StoreData = {
@@ -137,6 +159,7 @@ export function readStore(): StoreData {
       connections: defaultConnections(),
       localScans: [],
       snapshots: [],
+      securityAudits: [],
     };
     writeStore(fallback);
     return fallback;
@@ -157,6 +180,7 @@ export function maskSecret(value: string): string {
 }
 
 export function sanitizeSettingsForClient(settings: AppSettings) {
+  const m = settings.messaging;
   return {
     googleClientId: settings.googleClientId,
     hasGoogleClientSecret: Boolean(settings.googleClientSecret),
@@ -173,6 +197,22 @@ export function sanitizeSettingsForClient(settings: AppSettings) {
     hasLlmApiKey: Boolean(settings.llmApiKey),
     llmApiKeyMasked: maskSecret(settings.llmApiKey),
     sandboxEnabled: settings.sandboxEnabled,
+    messaging: {
+      hasTelegramBotToken: Boolean(m.telegramBotToken),
+      telegramBotTokenMasked: maskSecret(m.telegramBotToken),
+      telegramBotUsername: m.telegramBotUsername,
+      hasTelegramWebhookSecret: Boolean(m.telegramWebhookSecret),
+      telegramWebhookSecretMasked: maskSecret(m.telegramWebhookSecret),
+      allowedTelegramChatIds: m.allowedTelegramChatIds,
+      whatsappPhoneNumberId: m.whatsappPhoneNumberId,
+      hasWhatsappAccessToken: Boolean(m.whatsappAccessToken),
+      whatsappAccessTokenMasked: maskSecret(m.whatsappAccessToken),
+      whatsappVerifyToken: m.whatsappVerifyToken,
+      hasWhatsappAppSecret: Boolean(m.whatsappAppSecret),
+      whatsappAppSecretMasked: maskSecret(m.whatsappAppSecret),
+      whatsappBusinessNumber: m.whatsappBusinessNumber,
+      allowedWhatsappNumbers: m.allowedWhatsappNumbers,
+    },
   };
 }
 
